@@ -20,18 +20,15 @@ if ! command -v sshx &>/dev/null; then
   log "sshx installed successfully"
 fi
 
-# Try to extract link and sanitizse
+# Try to extract link
 attempt=1
 link=""
 while [[ "$attempt" -le "$MAX_RETRIES" ]]; do
   log "Attempt $attempt: capturing sshx link..."
-  link="$(timeout "$TIMEOUT" sshx \
+  raw_link="$(timeout "$TIMEOUT" sshx \
     | grep -o 'https://sshx.io[^ ]*' \
     | head -n1 || true)"
-  # Strip trailing _[0m if present (literal ESC + [0m)
-  link="${link//_
-
-\[0m/}"
+  link="${raw_link:0:-4}"  # trim last 4 chars (ANSI escape)
   if [[ -n "$link" ]]; then
     log "Captured link: $link"
     break
